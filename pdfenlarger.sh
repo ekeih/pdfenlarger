@@ -32,16 +32,16 @@ additional_space=${3}
 
 # pdfinfo will give us: Page size:      720 x 540 pts
 # so we need do extract the numbers
-size=$(pdfinfo ${input_file} | grep "Page size" | sed 's/.* \([0-9]\{1,\}\) x \([0-9]\{1,\}\) .*/\1 \2/')
-width=$(echo $size | awk '{print $1}')
-height=$(echo $size | awk '{print $2}')
+size=$(pdfinfo ${input_file} | grep -F "Page size" | sed 's/.* \([0-9]\{1,\}\) x \([0-9]\{1,\}\) .*/\1 \2/')
+width=$(awk '{print $1}' <<< ${size})
+height=$(awk '{print $2}' <<< ${size})
 
-offset_raw=$(( ${additional_space} / 2 ))
+offset_raw=$(( additional_space / 2 ))
 
 # define all parameters for pdfjam to add additional space at the right side
 new_height=${height}
-new_width=$(( ${width} + ${additional_space} ))
-offset_horizontal=$(( 0 - ${offset_raw} ))
+new_width=$(( width + additional_space ))
+offset_horizontal=$(( -offset_raw ))
 offset_vertical=0
 
 # if a fourth parameter is given, we need to check, where the additional space should be added
@@ -49,23 +49,23 @@ if [ ${#} == 4 ]
 then
     case ${4} in
         top)
-            new_height=$(( ${height} + ${additional_space} ))
+            new_height=$(( height + additional_space ))
             new_width=${width}
             offset_horizontal=0
-            offset_vertical=$(( 0 - ${offset_raw} ))
+            offset_vertical=$(( -offset_raw ))
         ;;
         right)
             #nothing to do
         ;;
         bottom)
-            new_height=$(( ${height} + ${additional_space} ))
+            new_height=$(( height + additional_space ))
             new_width=${width}
             offset_horizontal=0
             offset_vertical=${offset_raw}
         ;;
         left)
             new_height=${height}
-            new_width=$(( ${width} + ${additional_space} ))
+            new_width=$(( width + additional_space ))
             offset_horizontal=${offset_raw}
             offset_vertical=0
         ;;
@@ -76,4 +76,4 @@ then
     esac
 fi
 
-pdfjam ${input_file} -o ${output_file} --papersize "{${new_width}pt,${new_height}pt}" --offset "${offset_horizontal}pt ${offset_vertical}pt"
+pdfjam "${input_file}" -o "${output_file}" --papersize "{${new_width}pt,${new_height}pt}" --offset "${offset_horizontal}pt ${offset_vertical}pt"
