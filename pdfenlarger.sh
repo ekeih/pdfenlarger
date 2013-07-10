@@ -32,7 +32,7 @@ additional_space=${3}
 
 # pdfinfo will give us: Page size:      720 x 540 pts
 # so we need do extract the numbers
-size=$(pdfinfo ${input_file} | grep -F "Page size" | sed 's/.* \([0-9]\{1,\}\) x \([0-9]\{1,\}\) .*/\1 \2/')
+size=$(pdfinfo ${input_file} | grep -F "Page size" | sed 's/.* \([0-9]\+\) x \([0-9]\+\) .*/\1 \2/')
 width=$(awk '{print $1}' <<< ${size})
 height=$(awk '{print $2}' <<< ${size})
 
